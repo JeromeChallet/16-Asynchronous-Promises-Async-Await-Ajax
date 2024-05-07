@@ -3,6 +3,36 @@
 const btn = document.querySelector('.btn-country');
 const countriesContainer = document.querySelector('.countries');
 
+const renderCountry = function (data, className = '') {
+  //COUNTRY PROPERTIES
+  const flag = data.flags.svg;
+  const countryName = data.name.common;
+  const region = data.region;
+  const population = (data.population / 1000000).toFixed(2);
+  const language = Object.values(data.languages)[0];
+  const currency = Object.values(data.currencies)[0].name;
+  //HTML
+  const html = `
+          <article class="country ${className}">
+            <img class="country__img" src="${flag}" />
+            <div class="country__data">
+              <h3 class="country__name">${countryName}</h3>
+              <h4 class="country__region">${region}</h4>
+              <p class="country__row"><span>👫</span>${population} people</p>
+              <p class="country__row"><span>🗣️</span>${language}</p>
+              <p class="country__row"><span>💰</span>${currency}</p>
+            </div>
+          </article>`;
+
+  countriesContainer.insertAdjacentHTML('beforeend', html);
+  //countriesContainer.style.opacity = 1;
+};
+
+const renderError = function (msg) {
+  countriesContainer.insertAdjacentText('beforeend', msg);
+  //countriesContainer.style.opacity = 1;
+};
+
 /*
 ///////////////////XML HTTP RQUEST////////////////////
 const getCountryData = function (country) {
@@ -47,30 +77,7 @@ getCountryData('japan');
 
 ///////////////////CALLBACK HELL////////////////////
 */
-const renderCountry = function (data, className = '') {
-  //COUNTRY PROPERTIES
-  const flag = data.flags.svg;
-  const countryName = data.name.common;
-  const region = data.region;
-  const population = (data.population / 1000000).toFixed(2);
-  const language = Object.values(data.languages)[0];
-  const currency = Object.values(data.currencies)[0].name;
-  //HTML
-  const html = `
-        <article class="country ${className}">
-          <img class="country__img" src="${flag}" />
-          <div class="country__data">
-            <h3 class="country__name">${countryName}</h3>
-            <h4 class="country__region">${region}</h4>
-            <p class="country__row"><span>👫</span>${population} people</p>
-            <p class="country__row"><span>🗣️</span>${language}</p>
-            <p class="country__row"><span>💰</span>${currency}</p>
-          </div>
-        </article>`;
 
-  countriesContainer.insertAdjacentHTML('beforeend', html);
-  countriesContainer.style.opacity = 1;
-};
 /*
 const getCountryAndNeighbour = function (country) {
   //ajax call 1 for main country:
@@ -137,7 +144,11 @@ const getCountryData = function (country) {
 const getCountryData = function (country) {
   // country 1
   fetch(`https://restcountries.com/v3.1/name/${country}`)
-    .then(response => response.json())
+    // then method 2nd arg is used to handle rejection
+    .then(
+      response => response.json()
+      //err => alert(err)
+    )
     .then(data => {
       renderCountry(data[0]);
       const neighbours = data[0].borders; // Access borders directly from the country object
@@ -155,8 +166,20 @@ const getCountryData = function (country) {
           neighbourData.forEach(neighbour =>
             renderCountry(neighbour[0], 'neighbour')
           );
+        })
+        // the catch method allows us to catch an error no matter where it happens in the chain
+        // the err created here is a real JS object
+        .catch(err => {
+          console.error(`Error: ${err}`);
+          renderError(`Something went wrong: ${err.message}`);
+        })
+        // used for something that always need to happen no matter the result like a loading spiner
+        .finally(() => {
+          countriesContainer.style.opacity = 1;
         });
     });
 };
 
-getCountryData('france');
+btn.addEventListener('click', function () {
+  getCountryData('france');
+});
