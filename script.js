@@ -43,10 +43,10 @@ const getCountryData = function (country) {
 // Sample countries whose details we want to display.
 getCountryData('france');
 getCountryData('japan');
-*/
+
 
 ///////////////////CALLBACK HELL////////////////////
-
+*/
 const renderCountry = function (data, className = '') {
   //COUNTRY PROPERTIES
   const flag = data.flags.svg;
@@ -71,7 +71,7 @@ const renderCountry = function (data, className = '') {
   countriesContainer.insertAdjacentHTML('beforeend', html);
   countriesContainer.style.opacity = 1;
 };
-
+/*
 const getCountryAndNeighbour = function (country) {
   //ajax call 1 for main country:
   const request = new XMLHttpRequest();
@@ -109,3 +109,35 @@ const getCountryAndNeighbour = function (country) {
 };
 
 getCountryAndNeighbour('france');
+*/
+///////////////////PROMISES AND FETCH API////////////////////
+/*
+const request = fetch('https://restcountries.com/v3.1/name/france');
+console.log('request: ', request);
+
+// its arg is the resulting value of the fullfilled promise
+const getCountryData = function (country) {
+  // 1. the fetch function returns a promise
+  fetch(`https://restcountries.com/v3.1/name/${country}`)
+    // 2. then is what happens once the fetch function is successfull, to handle the successfull promise
+    .then(function (response) {
+      // 3. in order to be able to read the data of the body(response) we need to call the json method on the response
+      console.log('response: ', response);
+      // 4. this returns a promise on which we can call the then method again
+      return response.json();
+    })
+    // 5. the results of the fullfilled promise is the data itself we can access thanks to json method
+    .then(function (data) {
+      console.log('data: ', data);
+      renderCountry(data[0]);
+    });
+};
+*/
+// using arrow function
+const getCountryData = function (country) {
+  fetch(`https://restcountries.com/v3.1/name/${country}`)
+    .then(response => response.json())
+    .then(data => renderCountry(data[0]));
+};
+
+getCountryData('france');
