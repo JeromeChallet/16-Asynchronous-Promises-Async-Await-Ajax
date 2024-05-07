@@ -135,9 +135,28 @@ const getCountryData = function (country) {
 */
 // using arrow function
 const getCountryData = function (country) {
+  // country 1
   fetch(`https://restcountries.com/v3.1/name/${country}`)
     .then(response => response.json())
-    .then(data => renderCountry(data[0]));
+    .then(data => {
+      renderCountry(data[0]);
+      const neighbours = data[0].borders; // Access borders directly from the country object
+      if (!neighbours || neighbours.length === 0) return;
+      // Use Promise.all to wait for all fetch requests to finish before continuing
+      Promise.all(
+        neighbours.map(code =>
+          fetch(`https://restcountries.com/v3.1/alpha?codes=${code}`)
+        )
+      )
+        .then(responses =>
+          Promise.all(responses.map(response => response.json()))
+        )
+        .then(neighbourData => {
+          neighbourData.forEach(neighbour =>
+            renderCountry(neighbour[0], 'neighbour')
+          );
+        });
+    });
 };
 
 getCountryData('france');
