@@ -140,46 +140,98 @@ const getCountryData = function (country) {
     });
 };
 */
+
+const getJSON = function (url, errorMsg = 'something went wrong') {
+  return fetch(url)
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`${errorMsg} (${response.status})`);
+      }
+      return response.json(); // Return parsed JSON data
+    })
+    .catch(err => {
+      throw new Error(`${errorMsg} (${err.message})`); // Rethrow the error with a custom message
+    });
+};
+
+// // using arrow function
+// const getCountryData = function (country) {
+//   // country 1
+//   fetch(`https://restcountries.com/v3.1/name/${country}`)
+//     // then method 2nd arg is used to handle rejection
+//     .then(
+//       response => {
+//         if (!response.ok) {
+//           throw new Error(`Country not found (${response.status})`);
+//         }
+//         response.json();
+//       }
+//       //err => alert(err)
+//     )
+//     .then(data => {
+//       renderCountry(data[0]);
+//       const neighbours = data[0].borders; // Access borders directly from the country object
+//       if (!neighbours || neighbours.length === 0) return;
+//       // Use Promise.all to wait for all fetch requests to finish before continuing
+//       Promise.all(
+//         neighbours.map(code =>
+//           fetch(`https://restcountries.com/v3.1/alpha?codes=${code}`)
+//         )
+//       )
+//         .then(responses =>
+//           Promise.all(responses.map(response => response.json()))
+//         )
+//         .then(neighbourData => {
+//           neighbourData.forEach(neighbour =>
+//             renderCountry(neighbour[0], 'neighbour')
+//           );
+//         })
+//         // the catch method allows us to catch an error no matter where it happens in the chain
+//         // the err created here is a real JS object
+//         .catch(err => {
+//           console.error(`Error: ${err}`);
+//           renderError(`Something went wrong: ${err.message}`);
+//         })
+//         // used for something that always need to happen no matter the result like a loading spiner
+//         .finally(() => {
+//           countriesContainer.style.opacity = 1;
+//         });
+//     });
+// };
+
 // using arrow function
 const getCountryData = function (country) {
   // country 1
-  fetch(`https://restcountries.com/v3.1/name/${country}`)
-    // then method 2nd arg is used to handle rejection
-    .then(
-      response => response.json()
-      //err => alert(err)
-    )
+  getJSON(`https://restcountries.com/v3.1/name/${country}`, 'Country not found')
     .then(data => {
       renderCountry(data[0]);
       const neighbours = data[0].borders; // Access borders directly from the country object
-      if (!neighbours || neighbours.length === 0) return;
-      // Use Promise.all to wait for all fetch requests to finish before continuing
-      Promise.all(
+      if (!neighbours || neighbours.length === 0)
+        throw new Error('no neighbours found');
+      // country 2
+      return Promise.all(
         neighbours.map(code =>
-          fetch(`https://restcountries.com/v3.1/alpha?codes=${code}`)
+          getJSON(
+            `https://restcountries.com/v3.1/alpha/${code}`,
+            'Neighbouring country not found'
+          )
         )
-      )
-        .then(responses =>
-          Promise.all(responses.map(response => response.json()))
-        )
-        .then(neighbourData => {
-          neighbourData.forEach(neighbour =>
-            renderCountry(neighbour[0], 'neighbour')
-          );
-        })
-        // the catch method allows us to catch an error no matter where it happens in the chain
-        // the err created here is a real JS object
-        .catch(err => {
-          console.error(`Error: ${err}`);
-          renderError(`Something went wrong: ${err.message}`);
-        })
-        // used for something that always need to happen no matter the result like a loading spiner
-        .finally(() => {
-          countriesContainer.style.opacity = 1;
-        });
+      );
+    })
+    .then(neighbourData => {
+      neighbourData.forEach(neighbour =>
+        renderCountry(neighbour[0], 'neighbour')
+      );
+    })
+    .catch(err => {
+      console.log(`${err}`);
+      renderError(`Something went wrong: ${err.message}`);
+    })
+    .finally(() => {
+      countriesContainer.style.opacity = 1;
     });
 };
 
 btn.addEventListener('click', function () {
-  getCountryData('france');
+  getCountryData('japan');
 });
