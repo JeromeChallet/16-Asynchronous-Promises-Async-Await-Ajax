@@ -235,3 +235,13 @@ const getCountryData = function (country) {
 btn.addEventListener('click', function () {
   getCountryData('japan');
 });
+
+// anycode outside of callback will run first
+// 1.
+console.log('test start');
+// 4.
+setTimeout(() => console.log('0 sec timer'), 0);
+// 3.
+Promise.resolve('resolved promise 1').then(res => console.log(res));
+// 2.
+console.log('test end');
