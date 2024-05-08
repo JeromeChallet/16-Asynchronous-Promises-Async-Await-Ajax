@@ -25,12 +25,12 @@ const renderCountry = function (data, className = '') {
           </article>`;
 
   countriesContainer.insertAdjacentHTML('beforeend', html);
-  //countriesContainer.style.opacity = 1;
+  countriesContainer.style.opacity = 1;
 };
 
 const renderError = function (msg) {
   countriesContainer.insertAdjacentText('beforeend', msg);
-  //countriesContainer.style.opacity = 1;
+  countriesContainer.style.opacity = 1;
 };
 
 /*
@@ -198,7 +198,7 @@ const getJSON = function (url, errorMsg = 'something went wrong') {
 //         });
 //     });
 // };
-
+/*
 // using arrow function
 const getCountryData = function (country) {
   // country 1
@@ -293,3 +293,36 @@ wait(2)
 
 Promise.resolve('abc').then(x => console.log(x));
 Promise.reject(new Error('problem')).catch(x => console.error(x));
+*/
+///////////////////CONSUMING PROMISES////////////////////
+const getPosition = function () {
+  return new Promise(function (resolve, reject) {
+    navigator.geolocation.getCurrentPosition(resolve, reject);
+  });
+};
+
+// we can have several await functions inside an async function
+const whereAmI = async function () {
+  // geolocation
+  const pos = await getPosition();
+  const { latitude: lat, longitude: lng } = pos.coords;
+
+  // reverse geocoding
+  const resGeo = await fetch(`https://geocode.xyz/${lat},${lng}?geoit=json`);
+  const dataGeo = await resGeo.json();
+  // await will stop the execution of the code at this function until the promise is fullfilled
+  // not a problem in this case since its inside an async function
+  // country data
+  // fetch(`https://restcountries.com/v3.1/name/${country}`).then(res =>
+  //   console.log(res)
+  // );
+  const res = await fetch(
+    `https://restcountries.com/v3.1/name/${dataGeo.country}`
+  );
+  const data = await res.json();
+  console.log('data', data);
+  renderCountry(data[0]);
+};
+
+whereAmI();
+console.log('FIRST');
