@@ -236,6 +236,7 @@ btn.addEventListener('click', function () {
   getCountryData('japan');
 });
 
+///////////////////EVENT LOOP////////////////////
 // anycode outside of callback will run first
 // 1.
 console.log('test start');
@@ -245,3 +246,50 @@ setTimeout(() => console.log('0 sec timer'), 0);
 Promise.resolve('resolved promise 1').then(res => console.log(res));
 // 2.
 console.log('test end');
+
+///////////////////PROMISIFYING////////////////////
+// a fullfilled promise means to win the lottery and unfilled means losing
+// built in object the promise constructor
+// takes one function as an argument
+// we use the resolve function to set the promise as fullfilled reject for unfullfilled
+// promisifying: converts callback based async behaviour to promise based
+const lotteryPromise = new Promise(function (resolve, reject) {
+  console.log('lottery draw:');
+  setTimeout(function () {
+    if (Math.random() >= 0.5) {
+      resolve('You win');
+    } else {
+      reject(new Error('You lose'));
+    }
+  });
+});
+
+// called with the result value of the promise
+lotteryPromise.then(res => console.log(res)).catch(err => console.error(err));
+
+// promisifying setTimeout
+// we createa funciton in which we return a promise furthering encapsulation like the fetch function
+const wait = function (seconds) {
+  return new Promise(function (resolve) {
+    // in the case of a timer it is not necessary to wait for a value
+    setTimeout(resolve, seconds * 1000);
+  });
+};
+// wait for 2 seconds then it will resolve
+wait(2)
+  .then(() => {
+    console.log('i waited 1 sec');
+    return wait(1);
+  })
+  .then(() => {
+    console.log('i waited 2 sec');
+    return wait(1);
+  })
+  .then(() => {
+    console.log('i waited 3 sec');
+    return wait(1);
+  })
+  .then(() => console.log('i waited for 4 sec'));
+
+Promise.resolve('abc').then(x => console.log(x));
+Promise.reject(new Error('problem')).catch(x => console.error(x));
