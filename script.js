@@ -326,14 +326,38 @@ const whereAmI = async function () {
     const data = await res.json();
     console.log('data', data);
     renderCountry(data[0]);
+
+    //this string will become the fullfilled value of the promise that is returned by the function
+    return `u r in ${dataGeo.city}, ${dataGeo.country}`;
   } catch (err) {
     console.error('error: ', err);
     renderError(`something went wrong ${err.message}`);
+
+    //reject promise returned form async function
+    throw err;
   }
 };
 
-whereAmI();
-console.log('FIRST');
+///////////////////RETURNING VALUES FORM ASYNC FUNCTIONS////////////////////
+console.log('1: will get location');
+// const city = whereAmI();
+// console.log('city: ', city);
+
+// we use the then method to get the fullfilled value of the promise
+// whereAmI()
+//   .then(city => console.log(`2: ${city}`))
+//   .catch(err => console.error(`2: ${err.message}`))
+//   .finally(() => console.log('3:finished getting location'));
+
+(async function () {
+  try {
+    const city = await whereAmI();
+    console.log(`2: ${city}`);
+  } catch (err) {
+    console.error(`2: ${err.message}`);
+  }
+  console.log('3:finished getting location');
+})();
 
 ///////////////////ERROR HANDLING WITH TRY CATCH////////////////////
 // the catch block has access to whatever error is generated
