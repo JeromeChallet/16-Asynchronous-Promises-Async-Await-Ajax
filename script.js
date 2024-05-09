@@ -303,26 +303,44 @@ const getPosition = function () {
 
 // we can have several await functions inside an async function
 const whereAmI = async function () {
-  // geolocation
-  const pos = await getPosition();
-  const { latitude: lat, longitude: lng } = pos.coords;
+  try {
+    // geolocation
+    const pos = await getPosition();
+    const { latitude: lat, longitude: lng } = pos.coords;
 
-  // reverse geocoding
-  const resGeo = await fetch(`https://geocode.xyz/${lat},${lng}?geoit=json`);
-  const dataGeo = await resGeo.json();
-  // await will stop the execution of the code at this function until the promise is fullfilled
-  // not a problem in this case since its inside an async function
-  // country data
-  // fetch(`https://restcountries.com/v3.1/name/${country}`).then(res =>
-  //   console.log(res)
-  // );
-  const res = await fetch(
-    `https://restcountries.com/v3.1/name/${dataGeo.country}`
-  );
-  const data = await res.json();
-  console.log('data', data);
-  renderCountry(data[0]);
+    // reverse geocoding
+    const resGeo = await fetch(`https://geocode.xyz/${lat},${lng}?geoit=json`);
+    if (!resGeo.ok) throw new Error('problem getting location data');
+
+    const dataGeo = await resGeo.json();
+    // await will stop the execution of the code at this function until the promise is fullfilled
+    // not a problem in this case since its inside an async function
+    // country data
+    // fetch(`https://restcountries.com/v3.1/name/${country}`).then(res =>
+    //   console.log(res)
+    // );
+    const res = await fetch(
+      `https://restcountries.com/v3.1/name/${dataGeo.country}`
+    );
+    if (!resGeo.ok) throw new Error('problem getting country');
+    const data = await res.json();
+    console.log('data', data);
+    renderCountry(data[0]);
+  } catch (err) {
+    console.error('error: ', err);
+    renderError(`something went wrong ${err.message}`);
+  }
 };
 
 whereAmI();
 console.log('FIRST');
+
+///////////////////ERROR HANDLING WITH TRY CATCH////////////////////
+// the catch block has access to whatever error is generated
+// try {
+//   let = y = 1;
+//   const x = 2;
+//   x = 3;
+// } catch (err) {
+//   alert(err.message);
+// }
