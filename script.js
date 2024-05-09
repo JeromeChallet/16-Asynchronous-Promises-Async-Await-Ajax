@@ -294,6 +294,7 @@ wait(2)
 Promise.resolve('abc').then(x => console.log(x));
 Promise.reject(new Error('problem')).catch(x => console.error(x));
 */
+/*
 ///////////////////CONSUMING PROMISES////////////////////
 const getPosition = function () {
   return new Promise(function (resolve, reject) {
@@ -368,3 +369,27 @@ console.log('1: will get location');
 // } catch (err) {
 //   alert(err.message);
 // }
+*/
+///////////////////RUNNING PROMISES IN PARRALLEL////////////////////
+// we should always try to wrap async functions into a try catch block
+const get3Countries = async function (c1, c2, c3) {
+  try {
+    // the folowing functions r in parrallel
+    // const [data1] = await getJSON(`https://restcountries.com/v3.1/name/${c1}`);
+    // const [data2] = await getJSON(`https://restcountries.com/v3.1/name/${c2}`);
+    // const [data3] = await getJSON(`https://restcountries.com/v3.1/name/${c3}`);
+    // console.log(data1.capital, data2.capital, data3.capital);
+    // takes ina an array of promises to return one promise
+    // Promise.all short circuits when one promise rejects
+    const data = await Promise.all([
+      getJSON(`https://restcountries.com/v3.1/name/${c1}`),
+      getJSON(`https://restcountries.com/v3.1/name/${c2}`),
+      getJSON(`https://restcountries.com/v3.1/name/${c3}`),
+    ]);
+    console.log(data.map(d => d[0].capital));
+  } catch (err) {
+    console.err(err);
+  }
+};
+
+get3Countries('japan', 'france', 'china');
