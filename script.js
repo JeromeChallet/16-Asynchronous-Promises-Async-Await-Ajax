@@ -370,6 +370,7 @@ console.log('1: will get location');
 //   alert(err.message);
 // }
 */
+/*
 ///////////////////RUNNING PROMISES IN PARRALLEL////////////////////
 // we should always try to wrap async functions into a try catch block
 const get3Countries = async function (c1, c2, c3) {
@@ -393,3 +394,53 @@ const get3Countries = async function (c1, c2, c3) {
 };
 
 get3Countries('japan', 'france', 'china');
+*/
+///////////////////OTHER PROMISE COMBINATORS////////////////////
+// all combinators receive an array of promises to return one promise
+// promise.race
+// is settled as soon as one of the input promises settles
+// the winning promise is teh fullfilling promise
+// by winning it is the first promise to arrive even if that promise is faulty
+(async function () {
+  const res = await Promise.race([
+    getJSON(`https://restcountries.com/v3.1/name/japan`),
+    getJSON(`https://restcountries.com/v3.1/name/france`),
+    getJSON(`https://restcountries.com/v3.1/name/germany`),
+  ]);
+  console.log(res[0]);
+});
+
+// very usefull to automatically rejects after a certain time has passed if the user has a bad connection
+const timeout = function (sec) {
+  return new Promise(function (_, reject) {
+    setTimeout(function () {
+      reject(new Error('request took too long'));
+    }, sec * 1000);
+  });
+};
+
+Promise.race([
+  getJSON(`https://restcountries.com/v3.1/name/japan`),
+  timeout(0.1),
+])
+  .then(res => console.log(res[0]))
+  .catch(err => console.error(err));
+
+// promise.allSettled
+// will return the entire array of promises regardless if they are faulty
+// it's like promise.all but never shortcircuit if one is faulty
+Promise.allSettled([
+  Promise.resolve('success'),
+  Promise.resolve('error'),
+  Promise.resolve('another success'),
+]).then(res => console.log(res[0]));
+
+// promise.any
+// it is like promise.race but the rejected promises are ignored, unless all of them rejects
+Promise.any([
+  Promise.resolve('success'),
+  Promise.resolve('error'),
+  Promise.resolve('another success'),
+])
+  .then(res => console.log(res))
+  .catch(err => console.error(err));
